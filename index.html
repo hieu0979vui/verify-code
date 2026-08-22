@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Mã Discord</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
+        .card { background: #1e293b; border: 1px solid #334155; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 420px; width: 90%; }
+        h2 { color: #38bdf8; margin-bottom: 1rem; font-size: 1.5rem; }
+        p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; }
+        .code-box { background: #0f172a; border: 2px dashed #38bdf8; border-radius: 0.5rem; padding: 1rem; font-size: 1.8rem; font-weight: bold; color: #4ade80; letter-spacing: 3px; margin-bottom: 1rem; }
+        .timer { font-size: 0.85rem; color: #f43f5e; font-weight: 600; }
+        .btn-link { display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #2563eb; color: #fff; text-decoration: none; border-radius: 0.5rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="contentCard">
+    <h2>🔑 MÃ BÍ MẬT HÔM NAY</h2>
+    <p>Sao chép mã bên dưới, quay lại Discord và gõ lệnh: <br><strong style="color: #f1f5f9;">!verify &lt;mã&gt;</strong></p>
+    <div class="code-box" id="codeDisplay">Đang tải...</div>
+    <div class="timer" id="timerDisplay">Mã sẽ ẩn sau: 60s</div>
+</div>
+
+<script>
+    // -------------------------------------------------------------
+    // BẢO MẬT 1: Bắt buộc truy cập từ Link4Sub
+    // -------------------------------------------------------------
+    const referrer = document.referrer;
+    const isFromLink4Sub = referrer.includes("link4sub.com");
+
+    if (!isFromLink4Sub) {
+        document.getElementById("contentCard").innerHTML = `
+            <h2 style="color: #f43f5e;">⚠️ TRUY CẬP BỊ TỪ CHỐI</h2>
+            <p>Bạn không thể truy cập trực tiếp trang này! Vui lòng vượt qua nhiệm vụ để lấy mã xác nhận hợp lệ.</p>
+            <a href="THAY_LINK_LINK4SUB_CỦA_BẠN_VÀO_ĐÂY" class="btn-link">Đến Trang Vượt Nhiệm Vụ</a>
+        `;
+    } else {
+        // -------------------------------------------------------------
+        // TẢI MÃ TỪ PASTEFY / JSON BIN
+        // -------------------------------------------------------------
+        const RAW_DATA_URL = "THAY_LINK_RAW_PASTEFY_HOẶC_JSONBIN_VÀO_ĐÂY";
+
+        fetch(RAW_DATA_URL)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("codeDisplay").innerText = data.code;
+                startTimer(60);
+            })
+            .catch(err => {
+                document.getElementById("codeDisplay").innerText = "LỖI TẢI MÃ";
+            });
+    }
+
+    // -------------------------------------------------------------
+    // BẢO MẬT 2: Tự động ẩn mã sau 60 giây
+    // -------------------------------------------------------------
+    function startTimer(seconds) {
+        let timeLeft = seconds;
+        const timerEl = document.getElementById("timerDisplay");
+        const interval = setInterval(() => {
+            timeLeft--;
+            timerEl.innerText = `Mã sẽ ẩn sau: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                document.getElementById("codeDisplay").innerText = "ĐÃ HẾT HẠN";
+                timerEl.innerText = "Vui lòng tải lại trang từ Link4Sub để lấy lại mã.";
+            }
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
