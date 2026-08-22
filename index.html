@@ -26,23 +26,30 @@
 
 <script>
     // -------------------------------------------------------------
-    // BẢO MẬT 1: Bắt buộc truy cập từ Link4Sub
+    // CẤU HÌNH CỦA BẠN
+    // -------------------------------------------------------------
+    const RAW_DATA_URL = "https://pastefy.app/DÁN_PASTE_ID_CỦA_BẠN/raw";
+    const LINK4SUB_URL = "DÁN_LINK_LINK4SUB_CỦA_BẠN";
+
+    // -------------------------------------------------------------
+    // BẢO MẬT: Kiểm tra nguồn chuyển hướng (Referrer Whitelist)
     // -------------------------------------------------------------
     const referrer = document.referrer;
-    const isFromLink4Sub = referrer.includes("link4sub.com");
+    const allowedDomains = [
+        "link4sub.com",
+        "onthitracnghiem.com" // Domain trung gian của Link4Sub
+    ];
 
-    if (!isFromLink4Sub) {
+    const isValidReferrer = allowedDomains.some(domain => referrer.includes(domain));
+
+    if (!isValidReferrer) {
         document.getElementById("contentCard").innerHTML = `
             <h2 style="color: #f43f5e;">⚠️ TRUY CẬP BỊ TỪ CHỐI</h2>
             <p>Bạn không thể truy cập trực tiếp trang này! Vui lòng vượt qua nhiệm vụ để lấy mã xác nhận hợp lệ.</p>
-            <a href="THAY_LINK_LINK4SUB_CỦA_BẠN_VÀO_ĐÂY" class="btn-link">Đến Trang Vượt Nhiệm Vụ</a>
+            <a href="${LINK4SUB_URL}" class="btn-link">Đến Trang Vượt Nhiệm Vụ</a>
         `;
     } else {
-        // -------------------------------------------------------------
-        // TẢI MÃ TỪ PASTEFY / JSON BIN
-        // -------------------------------------------------------------
-        const RAW_DATA_URL = "THAY_LINK_RAW_PASTEFY_HOẶC_JSONBIN_VÀO_ĐÂY";
-
+        // Tải mã JSON từ Pastefy
         fetch(RAW_DATA_URL)
             .then(res => res.json())
             .then(data => {
@@ -54,9 +61,7 @@
             });
     }
 
-    // -------------------------------------------------------------
-    // BẢO MẬT 2: Tự động ẩn mã sau 60 giây
-    // -------------------------------------------------------------
+    // Tự động đếm ngược 60s ẩn mã
     function startTimer(seconds) {
         let timeLeft = seconds;
         const timerEl = document.getElementById("timerDisplay");
