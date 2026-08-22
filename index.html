@@ -12,7 +12,7 @@
         p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; }
         .code-box { background: #0f172a; border: 2px dashed #38bdf8; border-radius: 0.5rem; padding: 1rem; font-size: 1.8rem; font-weight: bold; color: #4ade80; letter-spacing: 3px; margin-bottom: 1rem; }
         .timer { font-size: 0.85rem; color: #f43f5e; font-weight: 600; }
-        .btn-link { display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #2563eb; color: #fff; text-decoration: none; border-radius: 0.5rem; font-weight: 600; }
+        .btn-reload { display: inline-block; margin-top: 1rem; padding: 0.6rem 1.2rem; background: #2563eb; color: #fff; text-decoration: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; }
     </style>
 </head>
 <body>
@@ -26,42 +26,26 @@
 
 <script>
     // -------------------------------------------------------------
-    // CẤU HÌNH CỦA BẠN
+    // DÁN LINK RAW PASTEFY CỦA BẠN VÀO ĐÂY
     // -------------------------------------------------------------
     const RAW_DATA_URL = "https://pastebin.com/raw/QG8sJ7Nt";
-    const LINK4SUB_URL = "https://link4sub.com/Pnsnnzvl6O";
 
-    // -------------------------------------------------------------
-    // BẢO MẬT: Kiểm tra nguồn chuyển hướng (Referrer Whitelist)
-    // -------------------------------------------------------------
-    const referrer = document.referrer;
-    const allowedDomains = [
-        "link4sub.com",
-        "onthitracnghiem.com" // Domain trung gian của Link4Sub
-    ];
-
-    const isValidReferrer = allowedDomains.some(domain => referrer.includes(domain));
-
-    if (!isValidReferrer) {
-        document.getElementById("contentCard").innerHTML = `
-            <h2 style="color: #f43f5e;">⚠️ TRUY CẬP BỊ TỪ CHỐI</h2>
-            <p>Bạn không thể truy cập trực tiếp trang này! Vui lòng vượt qua nhiệm vụ để lấy mã xác nhận hợp lệ.</p>
-            <a href="${LINK4SUB_URL}" class="btn-link">Đến Trang Vượt Nhiệm Vụ</a>
-        `;
-    } else {
-        // Tải mã JSON từ Pastefy
-        fetch(RAW_DATA_URL)
+    function loadCode() {
+        fetch(RAW_DATA_URL + "?t=" + new Date().getTime()) // Thêm query time để tránh bị cache trang web
             .then(res => res.json())
             .then(data => {
-                document.getElementById("codeDisplay").innerText = data.code;
-                startTimer(60);
+                if (data && data.code) {
+                    document.getElementById("codeDisplay").innerText = data.code;
+                    startTimer(60);
+                } else {
+                    document.getElementById("codeDisplay").innerText = "MÃ KHÔNG HỢP LỆ";
+                }
             })
             .catch(err => {
                 document.getElementById("codeDisplay").innerText = "LỖI TẢI MÃ";
             });
     }
 
-    // Tự động đếm ngược 60s ẩn mã
     function startTimer(seconds) {
         let timeLeft = seconds;
         const timerEl = document.getElementById("timerDisplay");
@@ -71,10 +55,13 @@
             if (timeLeft <= 0) {
                 clearInterval(interval);
                 document.getElementById("codeDisplay").innerText = "ĐÃ HẾT HẠN";
-                timerEl.innerText = "Vui lòng tải lại trang từ Link4Sub để lấy lại mã.";
+                timerEl.innerHTML = 'Vui lòng làm lại nhiệm vụ trên Link4Sub để lấy lại mã!';
             }
         }, 1000);
     }
+
+    // Tải mã ngay khi mở trang
+    loadCode();
 </script>
 
 </body>
