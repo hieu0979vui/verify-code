@@ -1,9 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Mã Discord</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
+        .card { background: #1e293b; border: 1px solid #334155; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 420px; width: 90%; }
+        h2 { color: #38bdf8; margin-bottom: 1rem; font-size: 1.5rem; }
+        p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; }
+        .code-box { background: #0f172a; border: 2px dashed #38bdf8; border-radius: 0.5rem; padding: 1rem; font-size: 1.8rem; font-weight: bold; color: #4ade80; letter-spacing: 3px; margin-bottom: 1rem; }
+        .timer { font-size: 0.85rem; color: #f43f5e; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="contentCard">
+    <h2>🔑 MÃ BÍ MẬT HÔM NAY</h2>
+    <p>Sao chép mã bên dưới, quay lại Discord và gõ lệnh: <br><strong style="color: #f1f5f9;">!verify &lt;mã&gt;</strong></p>
+    <div class="code-box" id="codeDisplay">Đang tải...</div>
+    <div class="timer" id="timerDisplay">Mã sẽ ẩn sau: 60s</div>
+</div>
+
 <script>
-    // BIN ID LẤY TỪ MÀN HÌNH BẠN CHỤP: 6a896df3f5f4af5e2934a611
-    const JSONBIN_URL = "https://api.jsonbin.io/v3/b/6a896df3f5f4af5e2934a611/latest";
-    
-    // DÁN MASTER KEY LẤY Ở BƯỚC 1 VÀO ĐÂY
+    // 1. DÁN MASTER KEY LẤY TỪ MỤC API KEYS TRÊN JSONBIN VÀO ĐÂY
     const MASTER_KEY = "$2a$10$S20o9MoR16s9PNzFHydENuQ8N7PVdRcU1KOKSDB.6T2IxhYYRjAKO";
+
+    // 2. LINK API JSONBIN
+    const JSONBIN_URL = "https://api.jsonbin.io/v3/b/6a896df3f5f4af5e2934a611/latest";
 
     function loadCode() {
         fetch(JSONBIN_URL, {
@@ -13,11 +38,13 @@
                 "X-Bin-Meta": "false"
             }
         })
-        .then(res => {
-            if (!res.ok) throw new Error("Lỗi HTTP: " + res.status);
+        .then(function(res) {
+            if (!res.ok) {
+                throw new Error("Lỗi kết nối: " + res.status);
+            }
             return res.json();
         })
-        .then(data => {
+        .then(function(data) {
             if (data && data.code) {
                 document.getElementById("codeDisplay").innerText = data.code;
                 startTimer(60);
@@ -25,7 +52,7 @@
                 document.getElementById("codeDisplay").innerText = "LỖI ĐỊNH DẠNG";
             }
         })
-        .catch(err => {
+        .catch(function(err) {
             console.error(err);
             document.getElementById("codeDisplay").innerText = "LỖI TẢI MÃ";
         });
@@ -34,16 +61,20 @@
     function startTimer(seconds) {
         let timeLeft = seconds;
         const timerEl = document.getElementById("timerDisplay");
-        const interval = setInterval(() => {
+        const interval = setInterval(function() {
             timeLeft--;
-            timerEl.innerText = `Mã sẽ ẩn sau: ${timeLeft}s`;
+            timerEl.innerText = "Mã sẽ ẩn sau: " + timeLeft + "s";
             if (timeLeft <= 0) {
                 clearInterval(interval);
                 document.getElementById("codeDisplay").innerText = "ĐÃ HẾT HẠN";
-                timerEl.innerText = "Vui lòng vượt lại Link4Sub để lấy mã mới!";
+                timerEl.innerText = "Vui lòng làm lại nhiệm vụ trên Link4Sub để lấy mã mới!";
             }
         }, 1000);
     }
 
+    // Chạy hàm tải mã khi trang web mở lên
     loadCode();
 </script>
+
+</body>
+</html>
