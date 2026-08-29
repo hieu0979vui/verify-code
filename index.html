@@ -1,96 +1,41 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác Nhận Mã Discord</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0f172a;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background-color: #1e293b;
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 420px;
-            width: 90%;
-            border: 1px solid #334155;
-        }
-        h2 {
-            color: #38bdf8;
-            margin-bottom: 0.8rem;
-            font-size: 1.5rem;
-        }
-        p {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 1.2rem;
-        }
-        .code-box {
-            background-color: #090d16;
-            border: 2px dashed #38bdf8;
-            border-radius: 0.5rem;
-            padding: 1.2rem;
-            margin: 1.5rem 0;
-            font-family: monospace;
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #4ade80;
-            letter-spacing: 2px;
-            user-select: all;
-            cursor: pointer;
-        }
-        .command-highlight {
-            color: #facc15;
-            font-weight: bold;
-            background-color: #334155;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .timer {
-            color: #f87171;
-            font-size: 0.85rem;
-            margin-top: 0.8rem;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>🔑 MÃ BÍ MẬT HÔM NAY</h2>
-    <p>Sao chép mã bên dưới, quay lại Discord và gõ lệnh:<br>
-    <span class="command-highlight">/verify code:&lt;mã&gt;</span></p>
-
-    <!-- Ô hiển thị mã bí mật -->
-    <div class="code-box" id="secretCode">Đang tải mã...</div>
-
-    <div class="timer" id="timer">Mã sẽ ẩn sau: 60s</div>
-</div>
-
 <script>
-    // ⚙️ THÔNG SỐ JSONBIN CỦA BẠN
     const JSONBIN_API_KEY = "$2a$10$S20o9MoR16s9PNzFHydENuQ8N7PVdRcU1KOKSDB.6T2IxhYYRjAKO";
     const JSONBIN_PASS_BIN_ID = "6a896df3f5f4af5e2934a611";
+    const LINK_NHIEM_VU = "https://link4sub.com/Pnsnnzvl6O"; // Link rút gọn nhiệm vụ của bạn
 
     const codeElement = document.getElementById('secretCode');
     const timerElement = document.getElementById('timer');
 
-    // 🚀 LẤY MÃ TRỰC TIẾP TỪ JSONBIN
+    // 🛡️ CHỨC NĂNG CHỐNG TRUY CẬP TRỰC TIẾP (ANTI-DIRECT ACCESS)
+    function checkValidAccess() {
+        const referrer = document.referrer; // Lấy trang nguồn mà user click chuyển sang
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasToken = urlParams.get('token'); // Hoặc token xác thực trên URL
+
+        // Kiểm tra nếu người dùng gõ trực tiếp URL (không có Referrer từ trang rút gọn)
+        if (!referrer || (!referrer.includes('link4sub.com') && !referrer.includes('link4sub'))) {
+            // Trường hợp truy cập chui / dán trực tiếp link
+            document.body.innerHTML = `
+                <div style="color: #f87171; text-align: center; padding: 2rem; font-family: sans-serif;">
+                    <h2>⚠️ TRUY CẬP BỊ CẤM!</h2>
+                    <p style="margin-top: 10px; color: #cbd5e1;">Bạn không thể truy cập trực tiếp trang này để lấy mã.</p>
+                    <p style="margin-top: 15px;">
+                        <a href="${LINK_NHIEM_VU}" style="color: #38bdf8; font-weight: bold; text-decoration: none; border: 1px solid #38bdf8; padding: 8px 16px; border-radius: 5px;">
+                            👉 Vượt Link Nhiệm Vụ Để Lấy Mã
+                        </a>
+                    </p>
+                </div>
+            `;
+            return false;
+        }
+        return true;
+    }
+
+    // LẤY MÃ TỪ JSONBIN KHI TRUY CẬP HỢP LỆ
     async function fetchSecretCode() {
+        // Nếu không hợp lệ thì dừng ngay, không gọi API lấy mã
+        if (!checkValidAccess()) return;
+
         try {
             const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_PASS_BIN_ID}/latest`, {
                 method: 'GET',
@@ -102,7 +47,6 @@
 
             if (response.ok) {
                 const data = await response.json();
-                // Lấy giá trị chuỗi "code" từ JSONBin
                 const code = data.code || "KHONG_CO_MA";
                 codeElement.innerText = code;
                 startTimer();
@@ -110,12 +54,10 @@
                 codeElement.innerText = "LỖI LẤY MÃ";
             }
         } catch (error) {
-            console.error(error);
             codeElement.innerText = "LỖI KẾT NỐI";
         }
     }
 
-    // ⏳ BỘ ĐẾM NGƯỢC 60 GIÂY
     function startTimer() {
         let timeLeft = 60;
         const countdown = setInterval(() => {
@@ -124,14 +66,10 @@
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 codeElement.innerText = "******";
-                timerElement.innerText = "Mã đã hết hạn hiển thị! Vui lòng tải lại trang.";
+                timerElement.innerText = "Mã đã hết hạn hiển thị! Vui lòng làm lại nhiệm vụ.";
             }
         }, 1000);
     }
 
-    // Chạy hàm lấy mã khi load trang
     fetchSecretCode();
 </script>
-
-</body>
-</html>
