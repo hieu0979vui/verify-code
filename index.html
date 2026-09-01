@@ -30,18 +30,21 @@
 </div>
 
 <script>
-    const LINK_NHIEM_VU = "https://link4sub.com/PTTGetkmlw";
+    // Link nhiệm vụ của bạn (nhớ thay bằng link Link4sub thực tế của bạn)
+    const LINK_NHIEM_VU = "https://link4sub.com/Pnsnnzvl6O"; 
+    
     const codeElement = document.getElementById('secretCode');
     const timerElement = document.getElementById('timer');
     const mainContainer = document.getElementById('mainContainer');
 
     async function fetchSecretCode() {
         const urlParams = new URLSearchParams(window.location.search);
-        const accessKey = urlParams.get('access') || '';
+        const t = urlParams.get('t') || '';
+        const sig = urlParams.get('sig') || '';
 
         try {
-            // Gọi đến API bảo mật trên Vercel
-            const response = await fetch(`/api/get-code?access=${accessKey}`);
+            // Gửi Token và chữ ký về cho máy chủ Vercel kiểm tra
+            const response = await fetch(`/api/get-code?t=${t}&sig=${sig}`);
             const data = await response.json();
 
             if (response.ok) {
@@ -50,8 +53,8 @@
             } else {
                 mainContainer.innerHTML = `
                     <h2 style="color: #f87171;">⚠️ TRUY CẬP BỊ CẤM!</h2>
-                    <p style="color: #cbd5e1; margin-top: 10px;">${data.error || "Truy cập không hợp lệ."}</p>
-                    <p style="color: #94a3b8; font-size: 0.85rem;">Vui lòng vượt qua trang nhiệm vụ để lấy mã.</p>
+                    <p style="color: #cbd5e1; margin-top: 10px;">${data.error || "Liên kết đã hết hạn hoặc không hợp lệ."}</p>
+                    <p style="color: #94a3b8; font-size: 0.85rem;">Vui lòng vượt qua trang nhiệm vụ để lấy mã mới.</p>
                     <a href="${LINK_NHIEM_VU}" class="btn-redirect">👉 Đến Trang Vượt Link</a>
                 `;
             }
